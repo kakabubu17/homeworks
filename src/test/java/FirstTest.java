@@ -1,17 +1,20 @@
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -34,8 +37,8 @@ public class FirstTest {
         driver = new ChromeDriver();
         driver.manage().window().maximize();
         logger.info("driver initialized");
-        driver.get("https://otus.ru");
-        logger.info("open page");
+        /*driver.get("https://otus.ru");
+        logger.info("open page"); */
         driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
 
 
@@ -112,7 +115,34 @@ public class FirstTest {
         //window.open()открывает новую вкладку
     }
 
+    @Test
+    public void testSrceenshot()
+    {
+        driver.get("https://google.com");
+        logger.info("open page");
 
+        By findInput = By.xpath("//input[@title='Поиск']");
+        driver.findElement(findInput).clear();
+        driver.findElement(findInput).sendKeys("base64 screen");
+
+        String base64Screen = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64);
+        System.out.println(base64Screen);
+        File file = OutputType.FILE.convertFromBase64Png(base64Screen);
+        saveFile(file);
+
+        File file1 = driver.findElement(findInput).getScreenshotAs(OutputType.FILE);
+        saveFile(file1);
+    }
+
+    private void saveFile(File file)
+    {
+        String fileName = "target/scr" + new Random().nextInt() + ".png";
+        try
+        {
+            FileUtils.copyFile(file, new File(fileName));
+        }
+        catch (IOException err) {logger.error(err);}
+    }
     @Ignore
     public void testBootstrap() throws InterruptedException
     {
