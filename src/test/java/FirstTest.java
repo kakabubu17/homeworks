@@ -9,6 +9,11 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.ie.InternetExplorerOptions;
 
 
 public class FirstTest {
@@ -20,8 +25,10 @@ public class FirstTest {
     @Before
     public void setUp()
     {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
+        FirefoxOptions opt = new FirefoxOptions();
+        opt.addArguments("headless");
+        //driver = WebDriverFactory.create(Browsers.FIREFOX, opt);
+        driver = WebDriverFactory.create(Browsers.FIREFOX);
         driver.manage().window().maximize();
         logger.info("driver initialized");
 
@@ -46,3 +53,4 @@ public class FirstTest {
         logger.info("close driver");
     }
 }
+
