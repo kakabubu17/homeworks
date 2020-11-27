@@ -25,10 +25,12 @@ public class FirstTest {
     @Before
     public void setUp()
     {
-        FirefoxOptions opt = new FirefoxOptions();
-        opt.addArguments("headless");
-        //driver = WebDriverFactory.create(Browsers.FIREFOX, opt);
-        driver = WebDriverFactory.create(Browsers.FIREFOX);
+        String opt = "headless";
+        opt = System.getProperty("option").trim().toLowerCase();
+        driver = WebDriverFactory.create(System.getProperty("browser").trim().toLowerCase(), opt);
+                //WebDriverFactory.create("chrome", opt);
+
+
         driver.manage().window().maximize();
         logger.info("driver initialized");
 
