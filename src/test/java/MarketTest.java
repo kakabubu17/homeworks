@@ -22,6 +22,7 @@ public class MarketTest {
     protected static WebDriver driver;
 
     private Logger logger = LogManager.getLogger(MarketTest.class);
+    private WebDriverWait wait;
 
     @Before
     public void setUp()
@@ -31,6 +32,7 @@ public class MarketTest {
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         logger.info("driver initialized");
+        wait = new WebDriverWait(driver, 10);
         driver.get("https://market.yandex.ru/");
         logger.info("open page");
 
@@ -44,12 +46,16 @@ public class MarketTest {
         By filterSamsung = By.xpath("//span[.='Samsung']/..");
         By filterXiaomi = By.xpath("//span[.='Xiaomi']/..");
         By sortPrice = By.xpath("//button[.='по цене']");
+        By helpPopup = By.xpath("//*[contains(text(), 'Напишите, какой товар вам нужен')]");
+        By comparePage = By.xpath("//div[contains(text(), 'добавлен к сравнению')]/../following-sibling::div/a");
+        By comparisonPhones = By.xpath("//a[contains(text(), 'Смартфон')]/..");
+        By removeListBtn = By.xpath("//button[text()='Удалить список']");
+        String phonesList = "//article//h3/a[contains(@title,'%1')]/ancestor::article/div/div[contains(@aria-label,'сравнению')]";
 
         //ждем плашку-подсказку
-        new WebDriverWait(driver, 10).until(ExpectedConditions.visibilityOf
-                (driver.findElement(By.xpath("//*[contains(text(), 'Напишите, какой товар вам нужен')]"))));
-        new WebDriverWait(driver, 10).until(ExpectedConditions.invisibilityOf
-                (driver.findElement(By.xpath("//*[contains(text(), 'Напишите, какой товар вам нужен')]"))));
+        visibilityWait(helpPopup);
+        wait.until(ExpectedConditions.invisibilityOf(driver.findElement(helpPopup)));
+
         //заходим в смартфоны
         elementClick(menuElectronic);
         elementClick(menuSmartphones);
@@ -58,10 +64,10 @@ public class MarketTest {
         //добавляем фильтры и сортировку
         addFilterAndSort(filterSamsung, filterXiaomi, sortPrice);
         logger.info("add filters and sort");
-        //new WebDriverWait(driver, 15).until(ExpectedConditions.elementToBeClickable(By.xpath("//article[1]//h3/a")));
+        waitSearchResultsLoaded();
 
-        List<WebElement> samsungPhones =  driver.findElements(By.xpath("//article//h3/a[contains(@title,'Samsung')]/ancestor::article/div/div[contains(@aria-label,'сравнению')]"));
-        List<WebElement> xiaomiPhones =  driver.findElements(By.xpath("//article//h3/a[contains(@title,'Xiaomi')]/ancestor::article/div/div[contains(@aria-label,'сравнению')]"));
+        List<WebElement> samsungPhones =  driver.findElements(By.xpath(phonesList.replace("%1", "Samsung")));
+        List<WebElement> xiaomiPhones =  driver.findElements(By.xpath(phonesList.replace("%1", "Xiaomi")));
 
         //добавляем первый Samsung и Xiaomi
         addFirstElem(samsungPhones);
@@ -70,15 +76,15 @@ public class MarketTest {
         logger.info("add first xiaomi");
 
         //переходим к сравнению
-        driver.findElement(By.xpath("//div[contains(text(), 'добавлен к сравнению')]/../following-sibling::div/a")).click();
-        new WebDriverWait(driver, 10).until(ExpectedConditions.urlContains("https://market.yandex.ru/compare/"));
+        elementClick(comparePage);
+        wait.until(ExpectedConditions.urlContains("https://market.yandex.ru/compare/"));
 
         //проверяем, что элемента два
-        List<WebElement> comparisonPhones =  driver.findElements(By.xpath("//a[contains(text(), 'Смартфон')]/.."));
-        Assert.assertEquals(comparisonPhones.size(), 2);
+        List<WebElement> comparisonPhonesList = driver.findElements(comparisonPhones);
+        Assert.assertEquals(comparisonPhonesList.size(), 2);
 
         //очищаем список сравнения
-        driver.findElement(By.xpath("//button[text()='Удалить список']")).click();
+        elementClick(removeListBtn);
         logger.info("list is empty");
     }
 
@@ -96,21 +102,31 @@ public class MarketTest {
         driver.findElement(filter).click();
         driver.findElement(filter2).click();
         elementClick(sort);
-        Thread.sleep(5000);
     }
 
     private void elementClick(By element)
     {
-        new WebDriverWait(driver, 15).until(ExpectedConditions.elementToBeClickable(driver.findElement(element)));
+        wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(element)));
         driver.findElement(element).click();
+    }
+
+    private void visibilityWait(By element)
+    {
+        wait.until(ExpectedConditions.visibilityOf(driver.findElement(element)));
     }
 
     private void addFirstElem(List<WebElement> list)
     {
         list.get(0).click();
         By plashka = By.xpath("//div[contains(text(), 'добавлен к сравнению')]");
-        new WebDriverWait(driver, 5).until(ExpectedConditions.visibilityOf(driver.findElement(plashka)));
+        visibilityWait(plashka);
         Assert.assertTrue(driver.findElement(plashka).isDisplayed());
+    }
+    private void waitSearchResultsLoaded()
+    {
+        By selectorSearchResults = By.xpath("//div[@data-zone-name='snippetList']/../div");
+        wait.until(ExpectedConditions.numberOfElementsToBe(selectorSearchResults, 1));
+        logger.info("Blur disappeared");
     }
 }
 
