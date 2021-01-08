@@ -21,22 +21,30 @@ public class OtusTest {
     String country = "Россия";
     String city = "Москва";
     String languageLevel = "Выше среднего (Upper Intermediate)";
+    String contactType1 = "telegram";
+    String contactValue1 = "@hurma";
+    String contactType2 = "vk";
+    String contactValue2 = "https://vk.com/feed";
+
+    MainPage mainPage;
+    Header header;
+    LoginPage loginPage;
+    LearningPage learningPage;
+    PersonalPage personalPage;
+
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().window().maximize();
         logger.info("driver initialized");
         driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
 
-
     }
 
     @Test
-    public void test()
-    {
+    public void test() {
 
         registration();
         enteringData();
@@ -45,30 +53,30 @@ public class OtusTest {
         registration();
 
 
-        Assert.assertEquals(name, driver.findElement(By.xpath(PersonalPage.nameField)).getAttribute("value"));
-        Assert.assertEquals(lastName, driver.findElement(By.xpath(PersonalPage.lastNameTb)).getAttribute("value"));
-        Assert.assertEquals(birthday, driver.findElement(By.xpath(PersonalPage.dateTb)).getAttribute("value"));
-        //Assert.assertEquals(country, driver.findElement(By.xpath("//p[contains(text(),'Страна')]/../following-sibling::div//label/div")).getText());
-        Assert.assertEquals(country, driver.findElement(By.xpath(PersonalPage.countryTb)).getText());
-        //Assert.assertEquals(city, driver.findElement(By.xpath("//p[contains(text(),'Город')]/../following-sibling::div//label/div")).getText());
-        Assert.assertEquals(city, driver.findElement(By.xpath(PersonalPage.cityTb)).getText());
-        Assert.assertEquals(languageLevel, driver.findElement(By.xpath(PersonalPage.langTb)).getText());
-        //Assert.assertEquals(languageLevel, driver.findElement(By.xpath("//p[contains(text(),'Уровень')]/../following-sibling::div/div/label/div")).getText().trim());
-    //TODO: сделать удаление контактов после проверки!
+        Assert.assertEquals(name, personalPage.getNameText());
+        Assert.assertEquals(lastName, personalPage.getLastNameText());
+        Assert.assertEquals(birthday, personalPage.getDayText());
+        Assert.assertEquals(country, personalPage.getCountryText());
+        Assert.assertEquals(city, personalPage.getCityText());
+        Assert.assertEquals(languageLevel, personalPage.getLangLvlText());
+        Assert.assertEquals(contactType1, personalPage.getContactTypeText(0));
+        Assert.assertEquals(contactType2, personalPage.getContactTypeText(1));
+        Assert.assertEquals(contactValue1, personalPage.getContactValueText(0));
+        Assert.assertEquals(contactValue2, personalPage.getContactValueText(1));
+        logger.info("asserts is done");
+        deletingContacts();
 
     }
 
     @After
-    public void close()
-    {
+    public void close() {
         if (driver != null) driver.quit();
         logger.info("close driver");
     }
 
 
-    private void startNewBrowser()
-    {
-        driver.quit();
+    private void startNewBrowser() {
+        driver.close();
         logger.info("close driver");
         driver = new ChromeDriver();
         driver.manage().window().maximize();
@@ -77,31 +85,27 @@ public class OtusTest {
         logger.info("new browser started");
     }
 
-    private void registration()
-    {
-        MainPage mainPage = new MainPage(driver);
+    private void registration() {
+        mainPage = new MainPage(driver);
         mainPage.open();
         logger.info("open page");
 
-        Header header = new Header(driver);
-        header.authBtnClick();
+        header = new Header(driver);
+        loginPage = header.authBtnClick();
         logger.info("open Login Page");
 
-        LoginPage loginPage = new LoginPage(driver);
         loginPage.auth("nrbttmuclrdiosyclb@niwghx.online", "zDwkLN7RW9@qGpn");
         logger.info("auth is done");
 
-        header.openLearningPage();
+        learningPage = header.openLearningPage();
         logger.info("open lk page");
 
-        LearningPage learningPage = new LearningPage(driver);
-        learningPage.openPersonalPage();
+        personalPage = learningPage.openPersonalPage();
         logger.info("open personal page");
     }
 
-    private void enteringData()
-    {
-        PersonalPage personalPage = new PersonalPage(driver);
+    private void enteringData() {
+
         personalPage.enterName(name);
         personalPage.enterLastName(lastName);
         personalPage.enterDate(birthday);
@@ -113,8 +117,17 @@ public class OtusTest {
         personalPage.addContact("VK", "https://vk.com/feed");
         personalPage.addContact("Тelegram", "@hurma");
         personalPage.submit();
-        new WebDriverWait(driver, 5).until(ExpectedConditions.urlToBe("https://otus.ru/lk/biography/skills/"));
+        new WebDriverWait(driver, 10).until(ExpectedConditions.urlToBe("https://otus.ru/lk/biography/skills/"));
         logger.info("entering data is done");
+    }
+
+    private void deletingContacts()
+    {
+        personalPage.deleteContacts(0);
+        personalPage.deleteContacts(1);
+        personalPage.submit();
+        new WebDriverWait(driver, 10).until(ExpectedConditions.urlToBe("https://otus.ru/lk/biography/skills/"));
+        logger.info("deleting is done");
     }
 }
 

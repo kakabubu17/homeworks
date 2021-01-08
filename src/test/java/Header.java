@@ -12,16 +12,16 @@ public class Header extends  AbstractPage{
     String menuBtn = "//div[contains(@class, 'username')]";
     String lkBtn = "//div[contains(@class, 'dropdown_right')]/a[contains(@title, 'Личный кабинет')]";
 
-    public Header authBtnClick()
+    public LoginPage authBtnClick()
     {
         clickElement(authBtn);
-        return this; //LoginPage????
+        return new LoginPage(driver);
     }
 
-    public Header openLearningPage()
+    public LearningPage openLearningPage()
     {
         clickElement(menuBtn);
         clickElement(lkBtn);
-        return this;
+        return new LearningPage(driver);
     }
 }
