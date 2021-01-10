@@ -15,15 +15,17 @@ public class OtusTest {
 
     private Logger logger = LogManager.getLogger(OtusTest.class);
 
+    String login = "nrbttmuclrdiosyclb@niwghx.online";
+    String pass = "zDwkLN7RW9@qGpn";
     String name = "Тестовый";
     String lastName = "Юзер";
     String birthday = "15.10.2003";
     String country = "Россия";
     String city = "Москва";
     String languageLevel = "Выше среднего (Upper Intermediate)";
-    String contactType1 = "telegram";
-    String contactValue1 = "@hurma";
-    String contactType2 = "vk";
+    String contactType1 = "Skype";
+    String contactValue1 = "hurma";
+    String contactType2 = "VK";
     String contactValue2 = "https://vk.com/feed";
 
     MainPage mainPage;
@@ -59,8 +61,8 @@ public class OtusTest {
         Assert.assertEquals(country, personalPage.getCountryText());
         Assert.assertEquals(city, personalPage.getCityText());
         Assert.assertEquals(languageLevel, personalPage.getLangLvlText());
-        Assert.assertEquals(contactType1, personalPage.getContactTypeText(0));
-        Assert.assertEquals(contactType2, personalPage.getContactTypeText(1));
+        Assert.assertEquals(contactType1.toLowerCase(), personalPage.getContactTypeText(0));
+        Assert.assertEquals(contactType2.toLowerCase(), personalPage.getContactTypeText(1));
         Assert.assertEquals(contactValue1, personalPage.getContactValueText(0));
         Assert.assertEquals(contactValue2, personalPage.getContactValueText(1));
         logger.info("asserts is done");
@@ -94,7 +96,7 @@ public class OtusTest {
         loginPage = header.authBtnClick();
         logger.info("open Login Page");
 
-        loginPage.auth("nrbttmuclrdiosyclb@niwghx.online", "zDwkLN7RW9@qGpn");
+        loginPage.auth(login, pass);
         logger.info("auth is done");
 
         learningPage = header.openLearningPage();
@@ -114,8 +116,8 @@ public class OtusTest {
         personalPage.enterLanguageLevel(languageLevel);
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("javascript:window.scrollBy(750,750)");
-        personalPage.addContact("VK", "https://vk.com/feed");
-        personalPage.addContact("Тelegram", "@hurma");
+        personalPage.addContact(contactType2, contactValue2);
+        personalPage.addContact(contactType1, contactValue1);
         personalPage.submit();
         new WebDriverWait(driver, 10).until(ExpectedConditions.urlToBe("https://otus.ru/lk/biography/skills/"));
         logger.info("entering data is done");
