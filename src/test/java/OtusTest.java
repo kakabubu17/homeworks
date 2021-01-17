@@ -1,12 +1,24 @@
 import io.github.bonigarcia.wdm.WebDriverManager;
+import io.qameta.allure.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.*;
-import org.openqa.selenium.*;
+import org.junit.gen5.api.AfterAll;
+import org.junit.gen5.api.BeforeAll;
+import org.junit.gen5.api.Test;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+//TODO: закоммитить, удалить локально и скачать заново
+
+import java.io.ByteArrayInputStream;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.gen5.api.Assertions.assertEquals;
 
 
 public class OtusTest {
@@ -35,7 +47,7 @@ public class OtusTest {
     PersonalPage personalPage;
 
 
-    @Before
+    @BeforeAll
     public void setUp() {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
@@ -46,6 +58,9 @@ public class OtusTest {
     }
 
     @Test
+    @Epic(value = "OtusTest")
+    @Story(value = "Заполнение личных данных на сайте Отуса")
+    @Description(value = "Заполняем данные, сохраняем, закрываем браузер, открываем заново и проверяем данные")
     public void test() {
 
         registration();
@@ -55,28 +70,28 @@ public class OtusTest {
         registration();
 
 
-        Assert.assertEquals(name, personalPage.getNameText());
-        Assert.assertEquals(lastName, personalPage.getLastNameText());
-        Assert.assertEquals(birthday, personalPage.getDayText());
-        Assert.assertEquals(country, personalPage.getCountryText());
-        Assert.assertEquals(city, personalPage.getCityText());
-        Assert.assertEquals(languageLevel, personalPage.getLangLvlText());
-        Assert.assertEquals(contactType1.toLowerCase(), personalPage.getContactTypeText(0));
-        Assert.assertEquals(contactType2.toLowerCase(), personalPage.getContactTypeText(1));
-        Assert.assertEquals(contactValue1, personalPage.getContactValueText(0));
-        Assert.assertEquals(contactValue2, personalPage.getContactValueText(1));
+        assertEquals(name, personalPage.getNameText());
+        assertEquals(lastName, personalPage.getLastNameText());
+        assertEquals(birthday, personalPage.getDayText());
+        assertEquals(country, personalPage.getCountryText());
+        assertEquals(city, personalPage.getCityText());
+        assertEquals(languageLevel, personalPage.getLangLvlText());
+        assertEquals(contactType1.toLowerCase(), personalPage.getContactTypeText(0));
+        assertEquals(contactType2.toLowerCase(), personalPage.getContactTypeText(1));
+        assertEquals(contactValue1, personalPage.getContactValueText(0));
+        assertEquals(contactValue2, personalPage.getContactValueText(1));
         logger.info("asserts is done");
         deletingContacts();
 
     }
 
-    @After
+    @AfterAll
     public void close() {
         if (driver != null) driver.quit();
         logger.info("close driver");
     }
 
-
+    @Step("Открываем браузер заново")
     private void startNewBrowser() {
         driver.close();
         logger.info("close driver");
@@ -86,7 +101,7 @@ public class OtusTest {
         driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
         logger.info("new browser started");
     }
-
+    @Step("Открываем форму авторизации")
     private void registration() {
         mainPage = new MainPage(driver);
         mainPage.open();
@@ -106,6 +121,7 @@ public class OtusTest {
         logger.info("open personal page");
     }
 
+    @Step("Вводим данные")
     private void enteringData() {
 
         personalPage.enterName(name);
@@ -121,8 +137,11 @@ public class OtusTest {
         personalPage.submit();
         new WebDriverWait(driver, 10).until(ExpectedConditions.urlToBe("https://otus.ru/lk/biography/skills/"));
         logger.info("entering data is done");
+        Allure.addAttachment("EnteringData", new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)));
+
     }
 
+    @Step("Удаляем контакты")
     private void deletingContacts()
     {
         personalPage.deleteContacts(0);

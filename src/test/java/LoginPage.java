@@ -1,4 +1,5 @@
-import com.oracle.tools.packager.Log;
+//import com.oracle.tools.packager.Log;
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -6,6 +7,7 @@ public class LoginPage extends AbstractPage {
 
     public LoginPage(WebDriver driver) { super(driver); }
 
+    @Step("Авторизация")
     public LoginPage auth(String login, String password)
     {
         By loginTb = By.xpath("//div[contains(@class, 'new-input-line_relative')][2]/input[@placeholder='Электронная почта']");
