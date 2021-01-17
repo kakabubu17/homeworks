@@ -2,9 +2,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import io.qameta.allure.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.gen5.api.AfterAll;
-import org.junit.gen5.api.BeforeAll;
-import org.junit.gen5.api.Test;
+import org.junit.jupiter.api.*;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -12,12 +10,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-//TODO: закоммитить, удалить локально и скачать заново
-
 import java.io.ByteArrayInputStream;
 import java.util.concurrent.TimeUnit;
-
 import static org.junit.gen5.api.Assertions.assertEquals;
 
 
@@ -25,7 +19,7 @@ public class OtusTest {
 
     protected static WebDriver driver;
 
-    private Logger logger = LogManager.getLogger(OtusTest.class);
+    private static Logger logger = LogManager.getLogger(OtusTest.class);
 
     String login = "nrbttmuclrdiosyclb@niwghx.online";
     String pass = "zDwkLN7RW9@qGpn";
@@ -48,7 +42,7 @@ public class OtusTest {
 
 
     @BeforeAll
-    public void setUp() {
+    public static void setUp() {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().window().maximize();
@@ -57,10 +51,10 @@ public class OtusTest {
 
     }
 
-    @Test
     @Epic(value = "OtusTest")
     @Story(value = "Заполнение личных данных на сайте Отуса")
     @Description(value = "Заполняем данные, сохраняем, закрываем браузер, открываем заново и проверяем данные")
+    @Test
     public void test() {
 
         registration();
@@ -86,7 +80,7 @@ public class OtusTest {
     }
 
     @AfterAll
-    public void close() {
+    public static void close() {
         if (driver != null) driver.quit();
         logger.info("close driver");
     }
